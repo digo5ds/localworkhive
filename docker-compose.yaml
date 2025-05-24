@@ -1,0 +1,13 @@
+services:
+  localstack:
+    environment:
+    - SERVICES=sqs,secretsmanager,lambda
+    - DEBUG=1
+    - DATA_DIR=/localstack/tmp/data
+    image: localstack/localstack:latest
+    ports:
+    - 4566:4566
+    - 4571:4571
+    volumes:
+    - /localstack:/localstack
+    - /var/run/docker.sock:/var/run/docker.sock
