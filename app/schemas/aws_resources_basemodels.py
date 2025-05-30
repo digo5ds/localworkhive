@@ -1,12 +1,13 @@
 """AWS Resources Base Models"""
 
-from io import BytesIO
 from typing import Dict, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from app.helpers.basemodel_mixin import BasemodelMixin
 
 
-class BucketBaseModel(BaseModel):
+class BucketBaseModel(BasemodelMixin):
     """
     Base model for AWS S3 bucket resources.
     """
@@ -25,7 +26,7 @@ class BucketBaseModel(BaseModel):
     )
 
 
-class S3FileStorageModel(BaseModel):
+class S3FileStorageModel(BasemodelMixin):
     """
     Base model for S3 file storage.
     """
@@ -35,9 +36,10 @@ class S3FileStorageModel(BaseModel):
     file_content: bytes | None = Field(
         ..., description="The content of the file in bytes."
     )
-    metadata: Dict = (
-        Field(default_factory=dict, description="Metadata associated with the file."),
+    metadata: Dict = Field(
+        default_factory=dict, description="Metadata associated with the file."
     )
+
     extra_args: Dict = Field(
         default_factory=dict,
         description="Additional tags associated with the file.",

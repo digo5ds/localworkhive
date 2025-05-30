@@ -1,7 +1,6 @@
 """Aws Resources Interface"""
 
 from abc import ABC, abstractmethod
-from typing import Optional, Union
 
 from app.helpers.exception_mixin import BotoExceptionHandlingMixin
 from app.schemas.aws_resources_basemodels import BucketBaseModel, S3FileStorageModel
