@@ -124,7 +124,7 @@ class BucketS3(ResourcesInterface):
         return True
 
     @exception_safe
-    def list_resources(self, resource_model=None):
+    def list_resources(self, resource_model=None) -> list:
         """
         Lists the buckets in the account.
 
@@ -147,8 +147,6 @@ class StorageS3(ResourcesInterface):
 
     Attributes:
         s3 (boto3.client): The boto3 S3 client instance.
-        bucket_name (str): The name of the S3 bucket to operate on.
-
     Methods:
         new_resource(resource_model: S3FileStorageModel):
             Uploads a file to the specified S3 bucket.
@@ -163,13 +161,12 @@ class StorageS3(ResourcesInterface):
             Downloads and returns the contents of a file from the specified S3 bucket.
     """
 
-    def __init__(self, bucket_name, region_name="us-east-1"):
+    def __init__(self, region_name="us-east-1"):
         self.s3 = boto3.client(
             "s3",
             endpoint_url=LOCALSTACK_ENDPOINT,
             region_name=region_name,
         )
-        self.bucket_name = bucket_name
 
     @exception_safe
     def new_resource(self, resource_model: S3FileStorageModel):
@@ -197,7 +194,7 @@ class StorageS3(ResourcesInterface):
             )
 
     @exception_safe
-    def delete_resource(self, resource_model: S3FileStorageModel):
+    def delete_resource(self, resource_model: S3FileStorageModel) -> S3FileStorageModel:
         """
         Deletes the specified file from the specified bucket.
 
@@ -211,7 +208,7 @@ class StorageS3(ResourcesInterface):
         botocore.exceptions.ClientError: If the operation fails.
         """
         return self.s3.delete_object(
-            Bucket=self.bucket_name, Key=resource_model.file_key
+            Bucket=resource_model.bucket_name, Key=resource_model.file_key
         )
 
     @exception_safe
@@ -264,7 +261,7 @@ class StorageS3(ResourcesInterface):
         botocore.exceptions.ClientError: If the operation fails.
         """
         response = self.s3.get_object(
-            Bucket=self.bucket_name, Key=S3FileStorageModel.file_key
+            Bucket=resource_model.bucket_name, Key=S3FileStorageModel.file_key
         )
         return response["Body"].read().decode("utf-8")
 
