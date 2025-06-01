@@ -52,11 +52,12 @@ class BotoExceptionHandlingMixin:
             ) from e
         except EndpointConnectionError as e:
             raise RuntimeError(
-                f"[ERROR]: Endpoint connection error, if running with localstack verify if localstack is running: {e}"
+                "[ERROR]: Endpoint connection error, if running with"
+                / f"localstack verify if localstack is running: {e}"
             ) from e
 
 
-def exception_safe(method):
+def boto_exceptions_handdler(method):
     """Decorator to wrap a method in safe_execute to catch and handle
     exceptions.
 

@@ -5,7 +5,7 @@ from io import BytesIO
 import boto3
 
 from app.common.constants import LOCALSTACK_ENDPOINT
-from app.helpers.exception_mixin import exception_safe
+from app.helpers.exception_mixin import boto_exceptions_handdler
 from app.interfaces.aws_resources_interface import ResourcesInterface
 from app.schemas.aws_resources_basemodels import BucketBaseModel, S3FileStorageBaseModel
 
@@ -48,7 +48,7 @@ class BucketS3(ResourcesInterface):
             aws_secret_access_key="test",
         )
 
-    @exception_safe
+    @boto_exceptions_handdler
     def get_resource(self, resource_model: BucketBaseModel):
         """Gets the specified bucket.
 
@@ -63,7 +63,7 @@ class BucketS3(ResourcesInterface):
         """
         return self.s3.head_bucket(Bucket=resource_model)
 
-    @exception_safe
+    @boto_exceptions_handdler
     def new_resource(self, resource_model: BucketBaseModel):
         """Creates a new S3 bucket based on the provided bucket model.
 
@@ -100,7 +100,7 @@ class BucketS3(ResourcesInterface):
                 },
             )
 
-    @exception_safe
+    @boto_exceptions_handdler
     def delete_resource(self, resource_model: BucketBaseModel):
         """Deletes a S3 bucket.
 
@@ -122,7 +122,7 @@ class BucketS3(ResourcesInterface):
         self.s3.delete_bucket(Bucket=resource_model.name)
         return True
 
-    @exception_safe
+    @boto_exceptions_handdler
     def list_resources(self, resource_model=None) -> list:
         """Lists the buckets in the account.
 
@@ -166,7 +166,7 @@ class StorageS3(ResourcesInterface):
             region_name=region_name,
         )
 
-    @exception_safe
+    @boto_exceptions_handdler
     def new_resource(self, resource_model: S3FileStorageBaseModel):
         """Uploads a file to the specified bucket.
 
@@ -190,7 +190,7 @@ class StorageS3(ResourcesInterface):
                 ExtraArgs=resource_model.extra_args,
             )
 
-    @exception_safe
+    @boto_exceptions_handdler
     def delete_resource(
         self, resource_model: S3FileStorageBaseModel
     ) -> S3FileStorageBaseModel:
@@ -209,7 +209,7 @@ class StorageS3(ResourcesInterface):
             Bucket=resource_model.bucket_name, Key=resource_model.file_key
         )
 
-    @exception_safe
+    @boto_exceptions_handdler
     def list_resources(self, resource_model: S3FileStorageBaseModel):
         """Lists all the objects in the specified bucket.
 
@@ -243,7 +243,7 @@ class StorageS3(ResourcesInterface):
 
         return files
 
-    @exception_safe
+    @boto_exceptions_handdler
     def get_resource(self, resource_model: S3FileStorageBaseModel):
         """Downloads the specified file from the specified bucket.
 
