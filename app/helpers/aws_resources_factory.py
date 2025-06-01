@@ -1,4 +1,4 @@
-"""AWS Resource helpers to manage resources"""
+"""AWS Resource helpers to manage resources."""
 
 from io import BytesIO
 
@@ -7,13 +7,13 @@ import boto3
 from app.common.constants import LOCALSTACK_ENDPOINT
 from app.helpers.exception_mixin import exception_safe
 from app.interfaces.aws_resources_interface import ResourcesInterface
-from app.schemas.aws_resources_basemodels import BucketBaseModel, S3FileStorageModel
+from app.schemas.aws_resources_basemodels import BucketBaseModel, S3FileStorageBaseModel
 
 
 class BucketS3(ResourcesInterface):
-    """
-    BucketS3 provides an interface for managing AWS S3 buckets using boto3,
-    supporting operations such as creation, retrieval, deletion, and listing of buckets.
+    """BucketS3 provides an interface for managing AWS S3 buckets using boto3,
+    supporting operations such as creation, retrieval, deletion, and listing of
+    buckets.
 
     Attributes:
         s3 (boto3.client): The boto3 S3 client configured for the specified region and endpoint.
@@ -50,8 +50,7 @@ class BucketS3(ResourcesInterface):
 
     @exception_safe
     def get_resource(self, resource_model: BucketBaseModel):
-        """
-        Gets the specified bucket.
+        """Gets the specified bucket.
 
         Parameters:
         bucket_name (str): The name of the bucket to be retrieved.
@@ -66,8 +65,7 @@ class BucketS3(ResourcesInterface):
 
     @exception_safe
     def new_resource(self, resource_model: BucketBaseModel):
-        """
-        Creates a new S3 bucket based on the provided bucket model.
+        """Creates a new S3 bucket based on the provided bucket model.
 
         Parameters:
         bucket_model (BucketBaseModel):
@@ -81,17 +79,19 @@ class BucketS3(ResourcesInterface):
         botocore.exceptions.ClientError: If the operation fails due to AWS service issues.
         """
 
-        # if resource_model.name in [bucket["Name"] for bucket in self.list_resources()]:
-        #     raise ValueError(f"Bucket {resource_model.name} already exists.")
-        # self.s3.create_bucket(Bucket=resource_model.name)
+        if resource_model.bucket_name in [
+            bucket["Name"] for bucket in self.list_resources()
+        ]:
+            raise ValueError(f"Bucket {resource_model.bucket_name} already exists.")
+        self.s3.create_bucket(Bucket=resource_model.bucket_name)
         if resource_model.lifecycle_configuration:
             self.s3.put_bucket_lifecycle_configuration(
-                Bucket=resource_model.name,
+                Bucket=resource_model.bucket_name,
                 LifecycleConfiguration=resource_model.lifecycle_configuration,
             )
         if resource_model.tags:
             self.s3.put_bucket_tagging(
-                Bucket=resource_model.name,
+                Bucket=resource_model.bucket_name,
                 Tagging={
                     "TagSet": [
                         {"Key": key, "Value": value}
@@ -102,8 +102,7 @@ class BucketS3(ResourcesInterface):
 
     @exception_safe
     def delete_resource(self, resource_model: BucketBaseModel):
-        """
-        Deletes a S3 bucket.
+        """Deletes a S3 bucket.
 
         Parameters:
         bucket_model (BucketBaseModel):
@@ -125,8 +124,7 @@ class BucketS3(ResourcesInterface):
 
     @exception_safe
     def list_resources(self, resource_model=None) -> list:
-        """
-        Lists the buckets in the account.
+        """Lists the buckets in the account.
 
         Returns:
         list: A list of dictionaries containing the name and creation date of each bucket.
@@ -138,8 +136,8 @@ class BucketS3(ResourcesInterface):
 
 
 class StorageS3(ResourcesInterface):
-    """
-    StorageS3 provides an interface for interacting with AWS S3 storage buckets.
+    """StorageS3 provides an interface for interacting with AWS S3 storage
+    buckets.
 
     This class implements methods to upload, delete, list, and retrieve files from an S3 bucket,
     using the boto3 client. It is designed to work with a specified bucket and region, and can
@@ -169,9 +167,8 @@ class StorageS3(ResourcesInterface):
         )
 
     @exception_safe
-    def new_resource(self, resource_model: S3FileStorageModel):
-        """
-        Uploads a file to the specified bucket.
+    def new_resource(self, resource_model: S3FileStorageBaseModel):
+        """Uploads a file to the specified bucket.
 
         Parameters:
         file_name (str): The name to be given to the uploaded file.
@@ -194,9 +191,10 @@ class StorageS3(ResourcesInterface):
             )
 
     @exception_safe
-    def delete_resource(self, resource_model: S3FileStorageModel) -> S3FileStorageModel:
-        """
-        Deletes the specified file from the specified bucket.
+    def delete_resource(
+        self, resource_model: S3FileStorageBaseModel
+    ) -> S3FileStorageBaseModel:
+        """Deletes the specified file from the specified bucket.
 
         Parameters:
         file_name (str): The name of the file to be deleted.
@@ -212,9 +210,8 @@ class StorageS3(ResourcesInterface):
         )
 
     @exception_safe
-    def list_resources(self, resource_model: S3FileStorageModel):
-        """
-        Lists all the objects in the specified bucket.
+    def list_resources(self, resource_model: S3FileStorageBaseModel):
+        """Lists all the objects in the specified bucket.
 
         Returns:
         list: A list of keys representing the objects in the bucket. If
@@ -228,7 +225,7 @@ class StorageS3(ResourcesInterface):
         if "Contents" in response:
             for obj in response["Contents"]:
                 files.append(
-                    S3FileStorageModel(
+                    S3FileStorageBaseModel(
                         bucket_name=resource_model.bucket_name,
                         file_key=obj["Key"],
                         file_content=None,  # Content is not needed for listing
@@ -247,9 +244,8 @@ class StorageS3(ResourcesInterface):
         return files
 
     @exception_safe
-    def get_resource(self, resource_model: S3FileStorageModel):
-        """
-        Downloads the specified file from the specified bucket.
+    def get_resource(self, resource_model: S3FileStorageBaseModel):
+        """Downloads the specified file from the specified bucket.
 
         Parameters:
         file_name (str): The name of the file to be downloaded.
@@ -261,18 +257,6 @@ class StorageS3(ResourcesInterface):
         botocore.exceptions.ClientError: If the operation fails.
         """
         response = self.s3.get_object(
-            Bucket=resource_model.bucket_name, Key=S3FileStorageModel.file_key
+            Bucket=resource_model.bucket_name, Key=S3FileStorageBaseModel.file_key
         )
         return response["Body"].read().decode("utf-8")
-
-
-lifecycle_configuration = {
-    "Rules": [
-        {
-            "ID": "ExpirarArquivosApos1Dias",
-            "Filter": {"Prefix": ""},  # Aplica a todos os arquivos
-            "Status": "Enabled",
-            "Expiration": {"Days": 1},
-        }
-    ]
-}
