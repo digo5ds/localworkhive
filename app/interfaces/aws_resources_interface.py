@@ -1,14 +1,13 @@
-"""Aws Resources Interface"""
+"""Aws Resources Interface."""
 
 from abc import ABC, abstractmethod
 
 from app.helpers.exception_mixin import BotoExceptionHandlingMixin
-from app.schemas.aws_resources_basemodels import BucketBaseModel, S3FileStorageModel
+from app.schemas.aws_resources_basemodels import BucketBaseModel, S3FileStorageBaseModel
 
 
 class ResourcesInterface(ABC, BotoExceptionHandlingMixin):
-    """
-    Base interface for managing AWS resources.
+    """Base interface for managing AWS resources.
 
     This class defines abstract methods that must be implemented
     by any resource class interacting with AWS services. It enforces
@@ -27,9 +26,9 @@ class ResourcesInterface(ABC, BotoExceptionHandlingMixin):
     """
 
     @abstractmethod
-    def new_resource(self, resource_model: BucketBaseModel | S3FileStorageModel):
-        """
-        Creates a new AWS S3 resource. The resource must not exist and must be empty.
+    def new_resource(self, resource_model: BucketBaseModel | S3FileStorageBaseModel):
+        """Creates a new AWS S3 resource. The resource must not exist and must
+        be empty.
 
         Parameters:
         resource_model (BucketBaseModel | S3FileStorageModel):
@@ -45,9 +44,9 @@ class ResourcesInterface(ABC, BotoExceptionHandlingMixin):
         raise NotImplementedError()
 
     @abstractmethod
-    def delete_resource(self, resource_model: BucketBaseModel | S3FileStorageModel):
-        """
-        Deletes a AWS S3 resource. The resource must exist and must be empty.
+    def delete_resource(self, resource_model: BucketBaseModel | S3FileStorageBaseModel):
+        """Deletes a AWS S3 resource. The resource must exist and must be
+        empty.
 
         Parameters:
         resource_model (BucketBaseModel | S3FileStorageModel):
@@ -64,10 +63,9 @@ class ResourcesInterface(ABC, BotoExceptionHandlingMixin):
     @abstractmethod
     def list_resources(
         self,
-        resource_model: BucketBaseModel | S3FileStorageModel | None,
+        resource_model: BucketBaseModel | S3FileStorageBaseModel | None,
     ):
-        """
-        Lists the resources of the specified type.
+        """Lists the resources of the specified type.
 
         Parameters:
         resource_model (BucketBaseModel | S3FileStorageModel):
@@ -82,9 +80,8 @@ class ResourcesInterface(ABC, BotoExceptionHandlingMixin):
         raise NotImplementedError()
 
     @abstractmethod
-    def get_resource(self, resource_model: BucketBaseModel | S3FileStorageModel):
-        """
-        Gets a AWS S3 resource.
+    def get_resource(self, resource_model: BucketBaseModel | S3FileStorageBaseModel):
+        """Gets a AWS S3 resource.
 
         Parameters:
         resource_model (BucketBaseModel | S3FileStorageModel):
