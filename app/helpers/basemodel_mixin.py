@@ -2,8 +2,7 @@ from pydantic import BaseModel
 
 
 class BasemodelMixin(BaseModel):
-    """
-    Mixin class for Pydantic models that provides utility methods.
+    """Mixin class for Pydantic models that provides utility methods.
 
     Methods:
         get_null_fields(fields=None):
@@ -12,8 +11,7 @@ class BasemodelMixin(BaseModel):
     """
 
     def get_null_fields(self) -> list:
-        """
-        Returns a list of field names that are currently None.
+        """Returns a list of field names that are currently None.
 
         Parameters:
         fields (list): Optional list of field names to consider. If not provided, all fields are considered.
