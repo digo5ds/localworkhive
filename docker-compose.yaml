@@ -1,13 +1,22 @@
 services:
   localstack:
     environment:
-    - SERVICES=sqs,secretsmanager,lambda
-    - DEBUG=1
-    - DATA_DIR=/localstack/tmp/data
+      - SERVICES=sqs,secretsmanager,lambda,s3
+      - DEBUG=1
+      - DATA_DIR=/localstack/tmp/data
     image: localstack/localstack:latest
     ports:
-    - 4566:4566
-    - 4571:4571
+      - 4566:4566
+      - 4571:4571
     volumes:
-    - /localstack:/localstack
-    - /var/run/docker.sock:/var/run/docker.sock
+      - /localstack:/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
+  localworkhive:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8000:8000
+    depends_on:
+      - localstack
+    command:  ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

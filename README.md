@@ -65,7 +65,7 @@ Future development plans include expanding support beyond S3:
 - Send and receive messages
 - Dead-letter queue support for retries
 
-#### 🐘 PostgreSQL (Local Only)
+#### 🐘 PostgreSQL
 - Integration with Docker Compose or local PostgreSQL instance
 - Basic API for CRUD operations
 - Simulates a persistence layer for MVPs requiring relational databases
