@@ -11,6 +11,7 @@ This project is intended to be used as a lab to test new and interesting technol
 
 The project was created to simplify and speed up the development of local MVPs. Currently, it provides an API for managing **Amazon S3**, supporting bucket and file operations.
 
+
 ---
 
 ### ⚠️ Warning
@@ -55,23 +56,23 @@ integration.
 
 Future development plans include expanding support beyond S3:
 
-#### 🗄️ DynamoDB
-- Create and delete tables
-- Add, update, retrieve, and delete items
-- Support for querying and scanning data
+  #### 🗄️ DynamoDB
+  - Create and delete tables
+  - Add, update, retrieve, and delete items
+  - Support for querying and scanning data
 
-#### 💬 SQS
-- Create and delete queues
-- Send and receive messages
-- Dead-letter queue support for retries
+  #### 💬 SQS
+  - Create and delete queues
+  - Send and receive messages
+  - Dead-letter queue support for retries
 
-#### 🐘 PostgreSQL
-- Integration with Docker Compose or local PostgreSQL instance
-- Basic API for CRUD operations
-- Simulates a persistence layer for MVPs requiring relational databases
+  #### 🐘 PostgreSQL
+  - Integration with Docker Compose or local PostgreSQL instance
+  - Basic API for CRUD operations
+  - Simulates a persistence layer for MVPs requiring relational databases
 
-#### 🔮 GraphQL Support (Planned)
-- Implementation of GraphQL queries and mutations to enhance API flexibility and efficiency
+  #### 🔮 GraphQL Support (Planned)
+  - Implementation of GraphQL queries and mutations to enhance API flexibility and efficiency
 
 ---
 

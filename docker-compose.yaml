@@ -17,6 +17,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - 8000:8000
+    environment:
+      - LOCALSTACK_ENDPOINT=${LOCALSTACK_ENDPOINT}
     depends_on:
       - localstack
     command:  ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
