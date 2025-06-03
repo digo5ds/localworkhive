@@ -154,6 +154,7 @@ def create_bucket(
     bucket_data: BucketBaseModel, s3_bucket_helper=Depends(__get_bucket_helper)
 ):
     """Creates a bucket in AWS S3.
+    Warning: The Field `bucket_name` is mandatory for this operation.
 
     Args:
     bucket_data (BucketBaseModel): The data for the bucket to be created.
@@ -187,15 +188,14 @@ def delete_bucket(
     bucket_data: BucketBaseModel, s3_bucket_helper=Depends(__get_bucket_helper)
 ):
     """Deletes a bucket in AWS S3.
+    Warning: The Field `bucket_name` is mandatory for this operation.    Args:
+        bucket_data (BucketBaseModel): The data for the bucket to be deleted.
 
-    Args:
-    bucket_data (BucketBaseModel): The data for the bucket to be deleted.
+        Returns:
+        dict: A dictionary containing a message indicating the status of the operation.
 
-    Returns:
-    dict: A dictionary containing a message indicating the status of the operation.
-
-    Raises:
-    HTTPException: If the operation fails.
+        Raises:
+        HTTPException: If the operation fails.
     """
     try:
         validation_result = required_fields_is_filled(["bucket_name"], bucket_data)
@@ -213,12 +213,12 @@ def delete_bucket(
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@router.get("/get_bucket")
+@router.get("/get_bucket{bucket_data.bucket_name}")
 def get_bucket(
     bucket_data: BucketBaseModel, s3_bucket_helper=Depends(__get_bucket_helper)
 ):
     """Retrieves a bucket from AWS S3.
-
+    Warning: The Field `bucket_name` is mandatory for this operation.
     Args:
     bucket_data (BucketBaseModel): The data for the bucket to be retrieved.
 
