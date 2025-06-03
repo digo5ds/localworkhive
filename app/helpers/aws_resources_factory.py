@@ -118,8 +118,8 @@ class BucketS3(ResourcesInterface):
         if not resource_model.name in [
             bucket["Name"] for bucket in self.list_resources()
         ]:
-            raise ValueError(f"Bucket {resource_model.name} does not exist.")
-        self.s3.delete_bucket(Bucket=resource_model.name)
+            raise ValueError(f"Bucket {resource_model.bucket_name} does not exist.")
+        self.s3.delete_bucket(Bucket=resource_model.bucket_name)
         return True
 
     @boto_exceptions_handdler
