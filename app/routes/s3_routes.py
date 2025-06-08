@@ -3,8 +3,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.helpers.api_validator_helper import required_fields_is_filled
-from app.helpers.aws_resources_factory import BucketS3, StorageS3
-from app.schemas.aws_resources_basemodels import BucketBaseModel, S3FileStorageBaseModel
+from app.helpers.s3_helper import BucketS3, StorageS3
+from app.schemas.s3_basebodels import BucketBaseModel, S3FileStorageBaseModel
 
 router = APIRouter(prefix="/aws/s3")
 
@@ -62,7 +62,7 @@ def upload_file(
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@router.delete("/s3/delete")
+@router.delete("/delete")
 def delete_file(
     file_data: S3FileStorageBaseModel,
     s3_storage_helper=Depends(__get_s3_storage_helper),
@@ -96,9 +96,10 @@ def delete_file(
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@router.get("/s3/read/{file_data.bucket_name}/{file_data.file_key}")
+@router.get("/read/{file_data.bucket_name}/{file_data.file_key}")
 def get_file(
-    file_data: S3FileStorageBaseModel,
+    file_name: str,
+    bucket_name: str,
     s3_storage_helper=Depends(__get_s3_storage_helper),
 ):
     """Retrieves a file from AWS S3.
@@ -115,36 +116,19 @@ def get_file(
     """
 
     try:
-        validation_result = required_fields_is_filled(
-            ["bucket_name", "file_key"], file_data
-        )
-        if validation_result is True:
-            return s3_storage_helper.read_file(file_data)
-        raise HTTPException(
-            status_code=400,
-            detail=f"Mandatory fields are missing: {validation_result}",
-        )
-
+        return s3_storage_helper.read_file(bucket_name=bucket_name, file_key=file_name)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@router.get("/s3/list/{file_data.bucket_name}")
-def list_files(
-    file_data: BucketBaseModel, s3_storage_helper=Depends(__get_s3_storage_helper)
-):
+@router.get("/list_files/{bucket_name}")
+def list_files(bucket_name: str, s3_storage_helper=Depends(__get_s3_storage_helper)):
     """Retrieves a bucket from AWS S3.
 
     Args:
     """
     try:
-        validation_result = required_fields_is_filled(["bucket_name"], file_data)
-        if validation_result is True:
-            s3_storage_helper.get_resource(file_data)
-        raise HTTPException(
-            status_code=400,
-            detail=f"Mandatory fields are missing: {validation_result}",
-        )
+        return s3_storage_helper.list_files(bucket_name)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 
@@ -184,9 +168,7 @@ def create_bucket(
 
 
 @router.delete("/delete_bucket")
-def delete_bucket(
-    bucket_data: BucketBaseModel, s3_bucket_helper=Depends(__get_bucket_helper)
-):
+def delete_bucket(bucket_name: str, s3_bucket_helper=Depends(__get_bucket_helper)):
     """Deletes a bucket in AWS S3.
     Warning: The Field `bucket_name` is mandatory for this operation.    Args:
         bucket_data (BucketBaseModel): The data for the bucket to be deleted.
@@ -198,25 +180,14 @@ def delete_bucket(
         HTTPException: If the operation fails.
     """
     try:
-        validation_result = required_fields_is_filled(["bucket_name"], bucket_data)
-        if validation_result is True:
-            s3_bucket_helper.delete_resource(bucket_data)
-            return {
-                "message": "Bucket deleted successfully",
-                "bucket_data": bucket_data,
-            }
-        raise HTTPException(
-            status_code=400,
-            detail=f"Mandatory fields are missing: {validation_result}",
-        )
+        return s3_bucket_helper.delete_resource(bucket_name)
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@router.get("/get_bucket{bucket_data.bucket_name}")
-def get_bucket(
-    bucket_data: BucketBaseModel, s3_bucket_helper=Depends(__get_bucket_helper)
-):
+@router.get("/get_bucket/{bucket_name}")
+def get_bucket(bucket_name: str, s3_bucket_helper=Depends(__get_bucket_helper)):
     """Retrieves a bucket from AWS S3.
     Warning: The Field `bucket_name` is mandatory for this operation.
     Args:
@@ -229,10 +200,10 @@ def get_bucket(
     HTTPException: If the operation fails.
     """
     try:
-        validation_result = required_fields_is_filled(["bucket_name"], bucket_data)
+        validation_result = required_fields_is_filled(["bucket_name"], bucket_name)
         if validation_result is True:
             # Assuming get_resource returns the bucket metadata
-            return s3_bucket_helper.get_resource(bucket_data)
+            return s3_bucket_helper.get_resource(bucket_name)
         raise HTTPException(
             status_code=400,
             detail=f"Mandatory fields are missing: {validation_result}",
