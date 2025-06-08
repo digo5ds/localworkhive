@@ -7,6 +7,7 @@ import boto3
 from app.common.constants import LOCALSTACK_ENDPOINT
 from app.helpers.exception_mixin import boto_exceptions_handdler
 from app.interfaces.aws_resources_interface import ResourcesInterface
+from app.interfaces.s3_interface import S3Interface
 from app.schemas.aws_resources_basemodels import BucketBaseModel, S3FileStorageBaseModel
 
 
@@ -135,7 +136,7 @@ class BucketS3(ResourcesInterface):
         return self.s3.list_buckets()["Buckets"]
 
 
-class StorageS3(ResourcesInterface):
+class StorageS3(S3Interface):
     """StorageS3 provides an interface for interacting with AWS S3 storage
     buckets.
 
@@ -167,7 +168,7 @@ class StorageS3(ResourcesInterface):
         )
 
     @boto_exceptions_handdler
-    def new_resource(self, resource_model: S3FileStorageBaseModel):
+    def create_file(self, resource_model: S3FileStorageBaseModel):
         """Uploads a file to the specified bucket.
 
         Parameters:
@@ -191,9 +192,7 @@ class StorageS3(ResourcesInterface):
             )
 
     @boto_exceptions_handdler
-    def delete_resource(
-        self, resource_model: S3FileStorageBaseModel
-    ) -> S3FileStorageBaseModel:
+    def delete_file(self, resource_model: S3FileStorageBaseModel):
         """Deletes the specified file from the specified bucket.
 
         Parameters:
@@ -210,7 +209,7 @@ class StorageS3(ResourcesInterface):
         )
 
     @boto_exceptions_handdler
-    def list_resources(self, resource_model: S3FileStorageBaseModel):
+    def list_files(self, resource_model: BucketBaseModel):
         """Lists all the objects in the specified bucket.
 
         Returns:
@@ -244,7 +243,7 @@ class StorageS3(ResourcesInterface):
         return files
 
     @boto_exceptions_handdler
-    def get_resource(self, resource_model: S3FileStorageBaseModel):
+    def read_file(self, resource_model: S3FileStorageBaseModel):
         """Downloads the specified file from the specified bucket.
 
         Parameters:
