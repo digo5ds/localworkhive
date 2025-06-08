@@ -1,12 +1,14 @@
 """AWS Resource helpers to manage resources."""
 
 from io import BytesIO
+from typing import Union
 
 import boto3
 
 from app.common.constants import LOCALSTACK_ENDPOINT
 from app.helpers.exception_mixin import boto_exceptions_handdler
 from app.interfaces.aws_resources_interface import ResourcesInterface
+from app.interfaces.s3_interface import S3Interface
 from app.schemas.aws_resources_basemodels import BucketBaseModel, S3FileStorageBaseModel
 
 
@@ -123,7 +125,7 @@ class BucketS3(ResourcesInterface):
         return True
 
     @boto_exceptions_handdler
-    def list_resources(self, resource_model=None) -> list:
+    def list_resources(self):
         """Lists the buckets in the account.
 
         Returns:
@@ -135,7 +137,7 @@ class BucketS3(ResourcesInterface):
         return self.s3.list_buckets()["Buckets"]
 
 
-class StorageS3(ResourcesInterface):
+class StorageS3(S3Interface):
     """StorageS3 provides an interface for interacting with AWS S3 storage
     buckets.
 
@@ -164,10 +166,12 @@ class StorageS3(ResourcesInterface):
             "s3",
             endpoint_url=LOCALSTACK_ENDPOINT,
             region_name=region_name,
+            aws_access_key_id="test",  # Credenciais fictícias
+            aws_secret_access_key="test",
         )
 
     @boto_exceptions_handdler
-    def new_resource(self, resource_model: S3FileStorageBaseModel):
+    def create_file(self, resource_model: S3FileStorageBaseModel):
         """Uploads a file to the specified bucket.
 
         Parameters:
@@ -191,9 +195,7 @@ class StorageS3(ResourcesInterface):
             )
 
     @boto_exceptions_handdler
-    def delete_resource(
-        self, resource_model: S3FileStorageBaseModel
-    ) -> S3FileStorageBaseModel:
+    def delete_file(self, bucket_name: str, file_key: str):
         """Deletes the specified file from the specified bucket.
 
         Parameters:
@@ -205,12 +207,10 @@ class StorageS3(ResourcesInterface):
         Raises:
         botocore.exceptions.ClientError: If the operation fails.
         """
-        return self.s3.delete_object(
-            Bucket=resource_model.bucket_name, Key=resource_model.file_key
-        )
+        return self.s3.delete_object(Bucket=bucket_name, Key=file_key)
 
     @boto_exceptions_handdler
-    def list_resources(self, resource_model: S3FileStorageBaseModel):
+    def list_files(self, bucket_name: str) -> list[S3FileStorageBaseModel]:
         """Lists all the objects in the specified bucket.
 
         Returns:
@@ -221,17 +221,17 @@ class StorageS3(ResourcesInterface):
         botocore.exceptions.ClientError: If the operation fails.
         """
         files = []
-        response = self.s3.list_objects_v2(Bucket=resource_model.bucket_name)
+        response = self.s3.list_objects_v2(Bucket=bucket_name)
         if "Contents" in response:
             for obj in response["Contents"]:
                 files.append(
                     S3FileStorageBaseModel(
-                        bucket_name=resource_model.bucket_name,
+                        bucket_name=bucket_name,
                         file_key=obj["Key"],
                         file_content=None,  # Content is not needed for listing
                         extra_args=self.s3.head_object(
-                            Bucket=resource_model.bucket_name,
-                            Key=resource_model.file_key,
+                            Bucket=bucket_name,
+                            Key=obj["Key"],
                         )["Metadata"],
                         metadata={
                             "LastModified": obj["LastModified"].isoformat(),
@@ -244,7 +244,7 @@ class StorageS3(ResourcesInterface):
         return files
 
     @boto_exceptions_handdler
-    def get_resource(self, resource_model: S3FileStorageBaseModel):
+    def read_file(self, bucket_name: str, file_key: str) -> Union[str, bytes]:
         """Downloads the specified file from the specified bucket.
 
         Parameters:
@@ -256,7 +256,5 @@ class StorageS3(ResourcesInterface):
         Raises:
         botocore.exceptions.ClientError: If the operation fails.
         """
-        response = self.s3.get_object(
-            Bucket=resource_model.bucket_name, Key=S3FileStorageBaseModel.file_key
-        )
+        response = self.s3.get_object(Bucket=bucket_name, Key=file_key)
         return response["Body"].read().decode("utf-8")
