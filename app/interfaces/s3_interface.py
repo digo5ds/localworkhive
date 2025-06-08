@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 from typing import Union
 
 from app.helpers.exception_mixin import BotoExceptionHandlingMixin
-from app.schemas.aws_resources_basemodels import S3FileStorageBaseModel
+from app.schemas.aws_resources_basemodels import BucketBaseModel, S3FileStorageBaseModel
 
 
 class S3Interface(ABC, BotoExceptionHandlingMixin):
@@ -36,7 +36,7 @@ class S3Interface(ABC, BotoExceptionHandlingMixin):
         raise NotImplementedError()
 
     @abstractmethod
-    def delete_file(self, resource_model: S3FileStorageBaseModel) -> bool:
+    def delete_file(self, resource_model: S3FileStorageBaseModel):
         """
         Delete a file from the specified S3 bucket.
 
@@ -50,7 +50,7 @@ class S3Interface(ABC, BotoExceptionHandlingMixin):
         raise NotImplementedError()
 
     @abstractmethod
-    def list_files(self) -> list[object]:
+    def list_files(self, resource_model: BucketBaseModel) -> list[object]:
         """
         List all files in the S3 bucket.
 
