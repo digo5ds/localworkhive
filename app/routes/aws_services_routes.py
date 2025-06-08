@@ -50,7 +50,7 @@ def upload_file(
             ["bucket_name", "file_key", "file_content"], file_data
         )
         if validation_result:
-            s3_storage_helper.new_resource(file_data)
+            s3_storage_helper.create_file(file_data)
             return {"message": "File uploaded successfully"}
 
         raise HTTPException(
@@ -86,7 +86,7 @@ def delete_file(
         if validation_result is True:
             return {
                 "message": "File removed successfully",
-                "deleted_file": s3_storage_helper.delete_resource(file_data),
+                "deleted_file": s3_storage_helper.delete_file(file_data),
             }
         raise HTTPException(
             status_code=400,
@@ -119,7 +119,7 @@ def get_file(
             ["bucket_name", "file_key"], file_data
         )
         if validation_result is True:
-            return s3_storage_helper.get_resource(file_data)
+            return s3_storage_helper.read_file(file_data)
         raise HTTPException(
             status_code=400,
             detail=f"Mandatory fields are missing: {validation_result}",
