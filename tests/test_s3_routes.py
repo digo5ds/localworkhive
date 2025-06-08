@@ -4,7 +4,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from app.routes import s3_routes
-from app.schemas.aws_resources_basemodels import BucketBaseModel, S3FileStorageBaseModel
+from app.schemas.s3_basebodels import BucketBaseModel, S3FileStorageBaseModel
 
 
 class TestAwsServicesRoutes(unittest.TestCase):

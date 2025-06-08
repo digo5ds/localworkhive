@@ -2,7 +2,7 @@ import unittest
 
 from pydantic import ValidationError
 
-from app.schemas.aws_resources_basemodels import BucketBaseModel, S3FileStorageBaseModel
+from app.schemas.s3_basebodels import BucketBaseModel, S3FileStorageBaseModel
 
 
 class TestBucketBaseModelValidation(unittest.TestCase):

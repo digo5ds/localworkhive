@@ -180,7 +180,8 @@ def delete_bucket(bucket_name: str, s3_bucket_helper=Depends(__get_bucket_helper
         HTTPException: If the operation fails.
     """
     try:
-        return s3_bucket_helper.delete_resource(bucket_name)
+        s3_bucket_helper.delete_resource(bucket_name)
+        return {"message": "Bucket deleted successfully", bucket_name: bucket_name}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e

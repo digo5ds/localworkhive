@@ -1,14 +1,11 @@
 """AWS Resource helpers to manage resources."""
 
-from io import BytesIO
-
 import boto3
 
 from app.common.constants import LOCALSTACK_ENDPOINT
 from app.helpers.exception_mixin import boto_exceptions_handdler
 from app.interfaces.aws_resources_interface import ResourcesInterface
-from app.interfaces.s3_interface import S3Interface
-from app.schemas.aws_resources_basemodels import BucketBaseModel, S3FileStorageBaseModel
+from app.schemas.s3_basebodels import BucketBaseModel
 
 
 class BucketS3(ResourcesInterface):
@@ -134,135 +131,3 @@ class BucketS3(ResourcesInterface):
         botocore.exceptions.ClientError: If the operation fails.
         """
         return self.s3.list_buckets()["Buckets"]
-
-
-class StorageS3(S3Interface):
-    """StorageS3 provides an interface for interacting with AWS S3 storage
-    buckets.
-
-    This class implements methods to upload, delete, list, and retrieve files from an S3 bucket,
-    using the boto3 client. It is designed to work with a specified bucket and region, and can
-    optionally use a custom endpoint (e.g., for localstack).
-
-    Attributes:
-        s3 (boto3.client): The boto3 S3 client instance.
-    Methods:
-        new_resource(resource_model: S3FileStorageModel):
-            Uploads a file to the specified S3 bucket.
-
-        delete_resource(resource_model: S3FileStorageModel):
-            Deletes a file from the specified S3 bucket.
-
-        list_resources(resource_model: S3FileStorageModel):
-            Lists all objects in the specified S3 bucket.
-
-        get_resource(resource_model: S3FileStorageModel):
-            Downloads and returns the contents of a file from the specified S3 bucket.
-    """
-
-    def __init__(self, region_name="us-east-1"):
-        self.s3 = boto3.client(
-            "s3",
-            endpoint_url=LOCALSTACK_ENDPOINT,
-            region_name=region_name,
-        )
-
-    @boto_exceptions_handdler
-    def create_file(self, resource_model: S3FileStorageBaseModel):
-        """Uploads a file to the specified bucket.
-
-        Parameters:
-        file_name (str): The name to be given to the uploaded file.
-        file_path (str): The path to the local file to be uploaded.
-
-        Returns:
-        str: A message indicating the status of the operation.
-
-        Raises:
-        botocore.exceptions.ClientError: If the operation fails.
-        """
-
-        with BytesIO(resource_model.file_content) as file_content:
-            file_content.seek(0)  # Reset the file pointer to the beginning
-            self.s3.upload_fileobj(
-                Fileobj=file_content,
-                Key=resource_model.file_key,
-                Bucket=resource_model.bucket_name,
-                ExtraArgs=resource_model.extra_args,
-            )
-
-    @boto_exceptions_handdler
-    def delete_file(self, resource_model: S3FileStorageBaseModel):
-        """Deletes the specified file from the specified bucket.
-
-        Parameters:
-        file_name (str): The name of the file to be deleted.
-
-        Returns:
-        str: A message indicating the status of the operation.
-
-        Raises:
-        botocore.exceptions.ClientError: If the operation fails.
-        """
-        return self.s3.delete_object(
-            Bucket=resource_model.bucket_name, Key=resource_model.file_key
-        )
-
-    @boto_exceptions_handdler
-    def list_files(self, bucket_name: str) -> list[S3FileStorageBaseModel]:
-        """Lists all the objects in the specified bucket.
-
-        Returns:
-        list: A list of keys representing the objects in the bucket. If
-            the bucket is empty, an empty list is returned.
-
-        Raises:
-        botocore.exceptions.ClientError: If the operation fails.
-        """
-        files = []
-        response = self.s3.list_objects_v2(Bucket=bucket_name)
-        if "Contents" in response:
-            for obj in response["Contents"]:
-                files.append(
-                    S3FileStorageBaseModel(
-                        bucket_name=bucket_name,
-                        file_key=obj["Key"],
-                        file_content=None,  # Content is not needed for listing
-                        extra_args=self.s3.head_object(
-                            Bucket=bucket_name,
-                            Key=obj["Key"],
-                        )["Metadata"],
-                        metadata={
-                            "LastModified": obj["LastModified"].isoformat(),
-                            "Size": obj["Size"],
-                            "ETag": obj["ETag"].strip('"'),
-                        },
-                    )
-                )
-
-        return files
-
-    @boto_exceptions_handdler
-    def read_file(self, resource_model: S3FileStorageBaseModel):
-        """Downloads the specified file from the specified bucket.
-
-        Parameters:
-        file_name (str): The name of the file to be downloaded.
-
-        Returns:
-        str: The contents of the file as a string.
-
-        Raises:
-        botocore.exceptions.ClientError: If the operation fails.
-        """
-        response = self.s3.get_object(
-            Bucket=resource_model.bucket_name, Key=S3FileStorageBaseModel.file_key
-        )
-        return response["Body"].read().decode("utf-8")
-
-
-# x = BucketBaseModel(
-#     bucket_name="my-bucket", tags={"key": "value"}, lifecycle_configuration=None
-# )
-# bucket_helper = BucketS3()
-# bucket_helper.new_resource(x)
