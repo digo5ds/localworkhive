@@ -209,7 +209,7 @@ class StorageS3(S3Interface):
         )
 
     @boto_exceptions_handdler
-    def list_files(self, resource_model: BucketBaseModel):
+    def list_files(self, bucket_name: str) -> list[S3FileStorageBaseModel]:
         """Lists all the objects in the specified bucket.
 
         Returns:
@@ -220,17 +220,17 @@ class StorageS3(S3Interface):
         botocore.exceptions.ClientError: If the operation fails.
         """
         files = []
-        response = self.s3.list_objects_v2(Bucket=resource_model.bucket_name)
+        response = self.s3.list_objects_v2(Bucket=bucket_name)
         if "Contents" in response:
             for obj in response["Contents"]:
                 files.append(
                     S3FileStorageBaseModel(
-                        bucket_name=resource_model.bucket_name,
+                        bucket_name=bucket_name,
                         file_key=obj["Key"],
                         file_content=None,  # Content is not needed for listing
                         extra_args=self.s3.head_object(
-                            Bucket=resource_model.bucket_name,
-                            Key=resource_model.file_key,
+                            Bucket=bucket_name,
+                            Key=obj["Key"],
                         )["Metadata"],
                         metadata={
                             "LastModified": obj["LastModified"].isoformat(),
@@ -259,3 +259,10 @@ class StorageS3(S3Interface):
             Bucket=resource_model.bucket_name, Key=S3FileStorageBaseModel.file_key
         )
         return response["Body"].read().decode("utf-8")
+
+
+# x = BucketBaseModel(
+#     bucket_name="my-bucket", tags={"key": "value"}, lifecycle_configuration=None
+# )
+# bucket_helper = BucketS3()
+# bucket_helper.new_resource(x)

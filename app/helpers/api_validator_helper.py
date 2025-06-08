@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from app.schemas.aws_resources_basemodels import BucketBaseModel, S3FileStorageBaseModel
+from app.schemas.s3_basebodels import BucketBaseModel, S3FileStorageBaseModel
 
 
 def required_fields_is_filled(
