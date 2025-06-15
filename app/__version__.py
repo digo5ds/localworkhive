@@ -1,6 +1,6 @@
 "version.py - Version management for the application."
 
-__version__ = "1.0.0"  # Update this version as needed
+__version__ = "1.0.1"  # Update this version as needed
 
 
 def get_version():

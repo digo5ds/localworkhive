@@ -27,6 +27,7 @@ The project was created to simplify and speed up the development of local MVPs. 
 ---
 
 ### 📦 Version
+- **1.0.1** — Refactor: Abstracted BaseModels and resource helpers to improve project structure and simplify Swagger docs.
 
 - **1.0.0** — Initial release with basic funcionalities
    -  S3 supports (files and buckets)
