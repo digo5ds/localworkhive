@@ -9,7 +9,7 @@ from app.common.constants import LOCALSTACK_ENDPOINT
 from app.helpers.exception_mixin import boto_exceptions_handdler
 from app.interfaces.aws_resources_interface import ResourcesInterface
 from app.interfaces.s3_interface import S3Interface
-from app.schemas.aws_resources_basemodels import BucketBaseModel, S3FileStorageBaseModel
+from app.schemas.s3_basebodels import BucketBaseModel, S3FileStorageBaseModel
 
 
 class BucketS3(ResourcesInterface):
