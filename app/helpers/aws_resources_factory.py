@@ -5,7 +5,7 @@ import boto3
 from app.common.constants import LOCALSTACK_ENDPOINT
 from app.helpers.exception_mixin import boto_exceptions_handdler
 from app.interfaces.aws_resources_interface import ResourcesInterface
-from app.schemas.s3_basebodels import BucketBaseModel
+from app.schemas.s3_basemodels import BucketBaseModel
 
 
 class BucketS3(ResourcesInterface):

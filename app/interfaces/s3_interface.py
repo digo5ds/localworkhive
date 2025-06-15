@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 from typing import Union
 
 from app.helpers.exception_mixin import BotoExceptionHandlingMixin
-from app.schemas.aws_resources_basemodels import S3FileStorageBaseModel
+from app.schemas.s3_basebodels import S3FileStorageBaseModel
 
 
 class S3Interface(ABC, BotoExceptionHandlingMixin):
