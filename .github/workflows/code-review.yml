@@ -1,35 +1,41 @@
-name: "Code Review"
+name: Gemini AI Code Reviewer
 
 on:
-  pull_request:
-    types: [opened, synchronize, ready_for_review]
+  issue_comment:
+    types: [created]
 
-# This is required for the action to be able to post comments on the PR.
-permissions:
-  contents: read
-  pull-requests: write
+permissions: write-all
 
 jobs:
-  review:
+  gemini-code-review:
     runs-on: ubuntu-latest
+    if: |
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/gemini-review')
     steps:
-      - name: "Run AI Code Review"
-        uses: petarzarkov/gemini-code-review-action@latest
+      - name: PR Info
+        run: |
+          echo "Comment: ${{ github.event.comment.body }}"
+          echo "Issue Number: ${{ github.event.issue.number }}"
+          echo "Repository: ${{ github.repository }}"
+
+      - name: Checkout Repo
+        uses: actions/checkout@v3
         with:
-          # Optional: Override the default exclude patterns
-          # exclude: '*.md,*.json,package-lock.json,*.test.ts,migrations/*,*.spec.ts,*.e2e.ts,test/*,tests/*'
+          fetch-depth: 0
 
-          # Optional: Choose your preferred model
-          model: gemini-2.0-flash-lite # default is gemini-3-pro-preview
-
-          # Optional: Enable/disable conversation continuity (default: true)
-          enable_conversation_context: true
-
-          # Optional: Skip code review for draft pull requests (default: true)
-          skip_draft_prs: true
-
-          # Optional: Set the language for AI responses (e.g., English, Spanish, French)
-          language: Portuguese
+      - name: Get PR Details
+        id: pr
+        run: |
+          PR_JSON=$(gh api repos/${{ github.repository }}/pulls/${{ github.event.issue.number }})
+          echo "head_sha=$(echo $PR_JSON | jq -r .head.sha)" >> $GITHUB_OUTPUT
+          echo "base_sha=$(echo $PR_JSON | jq -r .base.sha)" >> $GITHUB_OUTPUT
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: digo5ds/localworkhive@main
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: gemini-2.5-pro # Optional, default is `gemini-2.5-flash`
+          EXCLUDE: "*.md,*.txt,package-lock.json,*.yml,*.yaml"
