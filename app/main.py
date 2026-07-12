@@ -6,7 +6,7 @@ from fastapi.responses import RedirectResponse
 from app.common.config import API_PORT, FASTAPI_CONFIG
 from app.routes.aws_services_routes import router
 
-app = FastAPI(**FASTAPI_CONFIG)
+app = FastAPI(*FASTAPI_CONFIG
 
 
 @app.get("/", include_in_schema=False)
