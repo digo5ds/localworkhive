@@ -20,7 +20,7 @@ jobs:
           echo "Repository: ${{ github.repository }}"
 
       - name: Checkout Repo
-        uses: actions/checkout@v4 # <-- Atualizado para v4 (Resolve o aviso do Node 20)
+        uses: actions/checkout@v4 # Mantive a v4 para evitar o aviso do Node.js
         with:
           fetch-depth: 0
 
@@ -34,9 +34,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Gemini AI Code Review
-        uses: digo5ds/localworkhive@main
-        env: # <-- Trocado 'with:' para 'env:' (Resolve o erro do Unexpected input)
+        uses: truongnh1992/gemini-ai-code-reviewer@main 
+        with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GEMINI_MODEL: gemini-2.5-pro # Optional, default is `gemini-2.5-flash`
+          GEMINI_MODEL: gemini-2.5-pro
           EXCLUDE: "*.md,*.txt,package-lock.json,*.yml,*.yaml"
